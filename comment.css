@@ -1,0 +1,11 @@
+textarea.leaflet-comment {
+	border     : none;
+	padding    : 5px;
+	transition : border .1s linear;
+}
+
+textarea.leaflet-comment:focus {
+	border-left : 3px solid #999;
+	outline     : none;
+	transition  : border .1s linear;
+}
