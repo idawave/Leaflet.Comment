@@ -37,6 +37,17 @@ var CommentCounter = 0;
 
 L.Comment.include({
 	/**
+	 * @public
+	 */
+	clearCookieStorage : function() {
+		document.cookie.split(/; */).forEach(function(cookie) {
+			cookie = cookie.split("=")[0];
+			if (cookie.indexOf(cookieStamp) > -1) {
+				document.cookie = cookie + "=; Max-Age=0"
+			}
+		});
+	},
+	/**
 	 * @private
 	 */
 	_enable : function() {
