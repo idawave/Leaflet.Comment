@@ -7,7 +7,7 @@ L.Comment = L.Class.extend({
 		textColor          : "black",
 		onDragMessage      : "Click to drop me somewhere!",
 		onClickPlaceholder : "What is interesting here?",
-		saveInCookies      : true,
+		useCookies         : true,
 		cookieStamp        : "L-Comment-",
 		onInput            : null,
 	},
@@ -36,6 +36,9 @@ L.Comment = L.Class.extend({
 var CommentCounter = 0;
 
 L.Comment.include({
+	/**
+	 * @private
+	 */
 	_enable : function() {
 		if (!this._enabled) {
 			this
@@ -47,7 +50,25 @@ L.Comment.include({
 		}
 		return this;
 	},
+	/**
+	 * @private
+	 */
 	_disable : function() {
+		/* @todo */
+		this._enabled = false;
+		return this;
+	},
+	/**
+	 * @private
+	 */
+	_initializePopup :function() {
+		this._popup = new L.Popup()
+			.setContent(this._getInitialContent())
+			.setLatLng(this._map.getCenter())
+			.openOn(this._map);
+		if (!this._id) {
+			this._id = cookieStamp + (++CommentCounter);
+		}
 		return this;
 	},
 	_evt_onClick : function(evt) {
@@ -62,7 +83,7 @@ L.Comment.include({
 		this._popup.openOn(this._map);
 		this._animatePopupDrop(evt.layerPoint, evt.latlng.lng, evt.latlng.lat, null, function() {
 			this._popup.setContent(this._getEnabledContent());
-		});
+		})._saveInCookie(this._getPopupProperties());
 		return this;
 	},
 	_evt_trackPopup : function(evt) {
@@ -88,13 +109,6 @@ L.Comment.include({
 		}
 		return this;
 	},
-	_initializePopup :function() {
-		this._popup = new L.Popup()
-			.setContent(this._getInitialContent())
-			.setLatLng(this._map.getCenter())
-			.openOn(this._map);
-		return this;
-	},
 	_placePopup : function(latLng) {
 		this._popup.setLatLng(latLng);
 		return this;
@@ -102,11 +116,19 @@ L.Comment.include({
 	_bindEventOnContainer : function(event, container) {
 		var self = this;
 		container.addEventListener(event, function(evt) {
+			self._saveInCookie(self._getPopupProperties());
 			if (self.options.onInput) {
 				self.options.onInput.call(self, container.id, evt.target.value);
 			}
 		}, false);
 		return container;
+	},
+	_getPopupProperties : function() {
+		var props = {};
+		L.Util.setOptions(props, this.options, {
+			value : this._popup.getContent().value
+		});
+		return props;
 	},
 	_getInitialContent : function() {
 		return this._getContent("div", this.options.onDragMessage);
@@ -117,23 +139,30 @@ L.Comment.include({
 	},
 	_getContent : function(elType, content, klass) {
 		elType = elType || "div";
-		klass = klass || "";
+		klass  = klass || "";
 		var container = L.DomUtil.create(elType),
 			prop      = elType === "textarea" ? "placeholder" : "innerHTML";
 		container[prop] = content;
-		container.id = ++CommentCounter;
+		container.id = cookieStamp + (++CommentCounter);
 		container.className = "leaflet-comment " + klass;
+		
 		return container;
 	},
 	_initFromCookies : function() {
-		if (this.options.saveInCookies) {
-			
+		if (this.options.useCookies) {
+			/* todo */
 		}
 		return this;
 	},
-	_saveInCookie : function(id, value) {
-		if (this.options.saveInCookies) {
-			
+	_saveInCookie : function(value) {
+		var expirationThreshold, date;
+		if (this.options.useCookies) {
+			value = typeof value === "object" ? JSON.stringify(value) : value;
+			expirationThreshold = "";
+			date = new Date();
+			date.setTime(date.getTime() + (days * 86400000));
+			expirationThreshold = "; expires=" + date.toUTCString();
+			document.cookie = this.options.cookieStamp + this._id + "=" + value + expirationThreshold + "; path=/";
 		}
 		return this;
 	},
