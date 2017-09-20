@@ -30,12 +30,7 @@ L.Comment = L.Class.extend({
 			this._disable();
 		}
 		return this;
-	}
-});
-
-var CommentCounter = 0;
-
-L.Comment.include({
+	},
 	/**
 	 * @public
 	 */
@@ -43,10 +38,15 @@ L.Comment.include({
 		document.cookie.split(/; */).forEach(function(cookie) {
 			cookie = cookie.split("=")[0];
 			if (cookie.indexOf(cookieStamp) > -1) {
-				document.cookie = cookie + "=; Max-Age=0"
+				document.cookie = cookie + "=; Max-Age=0";
 			}
 		});
-	},
+	}
+});
+
+var CommentCounter = 0;
+
+L.Comment.include({
 	/**
 	 * @private
 	 */
@@ -82,6 +82,9 @@ L.Comment.include({
 		}
 		return this;
 	},
+	/**
+	 * @private
+	 */
 	_evt_onClick : function(evt) {
 		var originalEvt = evt.originalEvent;
 		L.DomEvent
@@ -97,9 +100,15 @@ L.Comment.include({
 		})._saveInCookie(this._getPopupProperties());
 		return this;
 	},
+	/**
+	 * @private
+	 */
 	_evt_trackPopup : function(evt) {
 		return this._placePopup(evt.latlng);
 	},
+	/**
+	 * @private
+	 */
 	_animatePopupDrop : function(pxpy, lngTarget, latTarget, currentLat, callback, step) {
 		if (!currentLat) {
 			currentLat = this._map.containerPointToLatLng(new L.Point(pxpy.x, pxpy.y - 8)).lat;
@@ -120,10 +129,16 @@ L.Comment.include({
 		}
 		return this;
 	},
+	/**
+	 * @private
+	 */
 	_placePopup : function(latLng) {
 		this._popup.setLatLng(latLng);
 		return this;
 	},
+	/**
+	 * @private
+	 */
 	_bindEventOnContainer : function(event, container) {
 		var self = this;
 		container.addEventListener(event, function(evt) {
@@ -134,6 +149,9 @@ L.Comment.include({
 		}, false);
 		return container;
 	},
+	/**
+	 * @private
+	 */
 	_getPopupProperties : function() {
 		var props = {};
 		L.Util.setOptions(props, this.options, {
@@ -141,13 +159,22 @@ L.Comment.include({
 		});
 		return props;
 	},
+	/**
+	 * @private
+	 */
 	_getInitialContent : function() {
 		return this._getContent("div", this.options.onDragMessage);
 	},
+	/**
+	 * @private
+	 */
 	_getEnabledContent : function() {
 		var container = this._getContent("textarea", this.options.onClickPlaceholder);
 		return this._bindEventOnContainer("input", container);
 	},
+	/**
+	 * @private
+	 */
 	_getContent : function(elType, content, klass) {
 		elType = elType || "div";
 		klass  = klass || "";
@@ -159,12 +186,18 @@ L.Comment.include({
 		
 		return container;
 	},
+	/**
+	 * @private
+	 */
 	_initFromCookies : function() {
 		if (this.options.useCookies) {
 			/* todo */
 		}
 		return this;
 	},
+	/**
+	 * @private
+	 */
 	_saveInCookie : function(value) {
 		var expirationThreshold, date;
 		if (this.options.useCookies) {
@@ -176,7 +209,7 @@ L.Comment.include({
 			document.cookie = this.options.cookieStamp + this._id + "=" + value + expirationThreshold + "; path=/";
 		}
 		return this;
-	},
+	}
 });
 
 })();
