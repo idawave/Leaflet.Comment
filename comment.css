@@ -1,11 +1,37 @@
-textarea.leaflet-comment {
-	border     : none;
+/**
+ * Overriding `textarea` within the pop-up
+ */
+.leaflet-comment textarea {
+	border     : 0px solid #999;
 	padding    : 5px;
+	max-width  : 150px;
+	max-height : 180px;
 	transition : border .1s linear;
 }
 
-textarea.leaflet-comment:focus {
+.leaflet-comment textarea:focus {
 	border-left : 3px solid #999;
 	outline     : none;
 	transition  : border .1s linear;
+}
+
+.leaflet-comment .leaflet-popup-content-wrapper, .leaflet-comment textarea {
+	border-radius     : 8px!important;
+-webkit-border-radius : 8px!important;
+   -moz-border-radius : 8px!important;	
+}
+
+/**
+ * Overriding the close button of the pop-up
+ */
+.leaflet-comment .leaflet-popup-close-button {
+	border-radius     : 100px!important;
+-webkit-border-radius : 100px!important;
+   -moz-border-radius : 100px!important;
+    top               : -7px!important;
+    right             : -7px!important;
+    background        : white!important;
+    width             : 14px!important;
+    font-size         : 13px!important;
+    padding           : 4px 4px!important;
 }

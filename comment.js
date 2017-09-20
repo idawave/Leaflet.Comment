@@ -1,9 +1,10 @@
-
 (function() {
+	
+"use strict";	
 	
 L.Comment = L.Class.extend({
 	options : {
-		backgroundColor    : "gray",
+		backgroundColor    : "white",
 		textColor          : "black",
 		onDragMessage      : "Click to drop me somewhere!",
 		onClickPlaceholder : "What is interesting here?",
@@ -65,7 +66,9 @@ L.Comment.include({
 	 * @private
 	 */
 	_disable : function() {
-		/* @todo */
+		this._map
+			.off("mousemove", this._evt_trackPopup, this)
+			.off("click", this._evt_onClick, this);
 		this._enabled = false;
 		return this;
 	},
@@ -73,12 +76,14 @@ L.Comment.include({
 	 * @private
 	 */
 	_initializePopup :function() {
-		this._popup = new L.Popup()
+		this._popup = new L.Popup({
+				className : "leaflet-comment"
+			})
 			.setContent(this._getInitialContent())
 			.setLatLng(this._map.getCenter())
 			.openOn(this._map);
 		if (!this._id) {
-			this._id = cookieStamp + (++CommentCounter);
+			this._id = this.options.cookieStamp + (++CommentCounter);
 		}
 		return this;
 	},
@@ -177,13 +182,14 @@ L.Comment.include({
 	 */
 	_getContent : function(elType, content, klass) {
 		elType = elType || "div";
-		klass  = klass || "";
+		klass  = klass  || "";
 		var container = L.DomUtil.create(elType),
 			prop      = elType === "textarea" ? "placeholder" : "innerHTML";
 		container[prop] = content;
-		container.id = cookieStamp + (++CommentCounter);
-		container.className = "leaflet-comment " + klass;
-		
+		container.id = this.options.cookieStamp + (++CommentCounter);
+		container.className = klass;
+		container.style.color = this.options.textColor;
+		container.style.backgroundColor = this.options.backgroundColor;
 		return container;
 	},
 	/**
@@ -204,7 +210,7 @@ L.Comment.include({
 			value = typeof value === "object" ? JSON.stringify(value) : value;
 			expirationThreshold = "";
 			date = new Date();
-			date.setTime(date.getTime() + (days * 86400000));
+			date.setTime(date.getTime() + (365 * 86400000)); // @todo handle number of days
 			expirationThreshold = "; expires=" + date.toUTCString();
 			document.cookie = this.options.cookieStamp + this._id + "=" + value + expirationThreshold + "; path=/";
 		}
