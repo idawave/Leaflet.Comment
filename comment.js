@@ -36,12 +36,13 @@ L.Comment = L.Class.extend({
 	 * @public
 	 */
 	clearCookieStorage : function() {
+		var stamp = this.options.cookieStamp;
 		document.cookie.split(/; */).forEach(function(cookie) {
 			cookie = cookie.split("=")[0];
-			if (cookie.indexOf(cookieStamp) > -1) {
+			if (cookie.indexOf(stamp) > -1) {
 				document.cookie = cookie + "=; Max-Age=0";
 			}
-		});
+		}, this);
 	}
 });
 
@@ -207,12 +208,12 @@ L.Comment.include({
 	_saveInCookie : function(value) {
 		var expirationThreshold, date;
 		if (this.options.useCookies) {
-			value = typeof value === "object" ? JSON.stringify(value) : value;
+			value = window.encodeURIComponent(typeof value === "object" ? JSON.stringify(value) : value);
 			expirationThreshold = "";
 			date = new Date();
 			date.setTime(date.getTime() + (365 * 86400000)); // @todo handle number of days
 			expirationThreshold = "; expires=" + date.toUTCString();
-			document.cookie = this.options.cookieStamp + this._id + "=" + value + expirationThreshold + "; path=/";
+			document.cookie = this._id + "=" + value + expirationThreshold + "; path=/";
 		}
 		return this;
 	}
