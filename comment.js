@@ -159,10 +159,10 @@ L.Comment.include({
 	 * @private
 	 */
 	_getPopupProperties : function() {
-		var props = {};
-		L.Util.setOptions(props, this.options, {
+		var props = {
 			value : this._popup.getContent().value
-		});
+		};
+		L.Util.setOptions(props, this.options);
 		return props;
 	},
 	/**
@@ -175,8 +175,7 @@ L.Comment.include({
 	 * @private
 	 */
 	_getEnabledContent : function() {
-		var container = this._getContent("textarea", this.options.onClickPlaceholder);
-		return this._bindEventOnContainer("input", container);
+		return this._bindEventOnContainer("input", this._getContent("textarea", this.options.onClickPlaceholder));
 	},
 	/**
 	 * @private
@@ -209,7 +208,6 @@ L.Comment.include({
 		var expirationThreshold, date;
 		if (this.options.useCookies) {
 			value = window.encodeURIComponent(typeof value === "object" ? JSON.stringify(value) : value);
-			expirationThreshold = "";
 			date = new Date();
 			date.setTime(date.getTime() + (365 * 86400000)); // @todo handle number of days
 			expirationThreshold = "; expires=" + date.toUTCString();
