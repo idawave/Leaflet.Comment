@@ -1,8 +1,17 @@
 (function() {
 	
 "use strict";	
-	
+
+/**
+ * Public methods exposed by the L.Comment class
+ */	
 L.Comment = L.Class.extend({
+	/**
+	 * Default options for any L.Comment instance
+	 * Pass an object with below keys to override
+	 * these values upon creating a new instance
+	 * @public
+	 */
 	options : {
 		backgroundColor    : "white",
 		textColor          : "black",
@@ -12,20 +21,52 @@ L.Comment = L.Class.extend({
 		cookieStamp        : "L-Comment-",
 		onInput            : null,
 	},
+	/**
+	 * Automatically called when initializing an instance
+	 * @public
+	 * @param {Object} opts - a set of options
+	 * @return {L.Comment} the current instance
+	 */
 	initialize : function(opts) {
 		L.Util.setOptions(this, opts);
 		return this;
 	},
+	/**
+	 * Add the instance to the map
+	 * @public
+	 * @param {L.Map} map - a leaflet map instance
+	 * @return {L.Comment} the current instance
+	 */
 	addTo : function(map) {
 		return this.onAdd(map);
 	},
+	/**
+	 * Similar method as addTo
+	 * @public
+	 * @param {L.Map} map - a leaflet map instance
+	 * @return {L.Comment} the current instance
+	 */
 	onAdd : function(map) {
 		this._map = map;
 		return this._enable();
 	},
+	/**
+	 * Remove the current instance from the map
+	 * @public
+	 * @return {L.Comment} the current instance
+	 */
 	remove : function() {
 		return this.removeFrom(this._map);
 	},
+	/**
+	 * Remove the current instance from a given map
+	 * The map passed explicitly as arguments
+	 * as to be the same than the one passed
+	 * in the addTo or onAdd methods
+	 * @public
+	 * @param {L.Map} map - a leaflet map instance
+	 * @return {L.Comment} the current instance
+	 */
 	removeFrom : function(map) {
 		if (map === this._map) {
 			this._disable();
@@ -33,7 +74,23 @@ L.Comment = L.Class.extend({
 		return this;
 	},
 	/**
+	 * Get all the properties of the instance
+	 * at a given time
 	 * @public
+	 * @return {Object} the properties of the instance
+	 */
+	getPopupProperties : function() {
+		var props = {
+			value : this._popup.getContent().value
+		};
+		L.Util.setOptions(props, this.options);
+		return props;
+	},
+	/**
+	 * Empty the cookies related to the L.Comment class
+	 * @todo perhaps it should be a static method
+	 * @public
+	 * @return {L.Comment} the current instance
 	 */
 	clearCookieStorage : function() {
 		var stamp = this.options.cookieStamp;
@@ -43,14 +100,26 @@ L.Comment = L.Class.extend({
 				document.cookie = cookie + "=; Max-Age=0";
 			}
 		}, this);
+		return this;
 	}
 });
 
+// Used to generate new unique ids for newly created instance
+// Each newly instantiated L.Comment will augment this counter by one
 var CommentCounter = 0;
 
+
+/**
+ * Private methods
+ * You should not rely on the below methods
+ * when manipulating a L.Comment instance
+ */
 L.Comment.include({
 	/**
+	 * Initialize a pop-up and bind
+	 * its core events to the map
 	 * @private
+	 * @return {L.Comment} the current instance
 	 */
 	_enable : function() {
 		if (!this._enabled) {
@@ -64,7 +133,10 @@ L.Comment.include({
 		return this;
 	},
 	/**
+	 * Remove a pop-up and unbind
+	 * its core events from the map
 	 * @private
+	 * @return {L.Comment} the current instance
 	 */
 	_disable : function() {
 		this._map
@@ -89,7 +161,11 @@ L.Comment.include({
 		return this;
 	},
 	/**
+	 * Event handler for `click`
+	 * Will drop the pop-up to the map
 	 * @private
+	 * @param {Event} evt - the event
+	 * @return {L.Comment} the current instance
 	 */
 	_evt_onClick : function(evt) {
 		var originalEvt = evt.originalEvent;
@@ -103,17 +179,26 @@ L.Comment.include({
 		this._popup.openOn(this._map);
 		this._animatePopupDrop(evt.layerPoint, evt.latlng.lng, evt.latlng.lat, null, function() {
 			this._popup.setContent(this._getEnabledContent());
-		})._saveInCookie(this._getPopupProperties());
+		})._saveInCookie(this.getPopupProperties());
 		return this;
 	},
 	/**
+	 * Event handler for `mousemove`
+	 * Will reposition the pop-up
+	 * where the mouse is currently located
 	 * @private
+	 * @param {Event} evt - the event
+	 * @return {L.Comment} the current instance
 	 */
 	_evt_trackPopup : function(evt) {
 		return this._placePopup(evt.latlng);
 	},
 	/**
+	 * Animate the pop-up "fall"
+	 * after a click occured on the map
+	 * @todo perhaps some refactoring needed?
 	 * @private
+	 * @return {L.Comment} the current instance
 	 */
 	_animatePopupDrop : function(pxpy, lngTarget, latTarget, currentLat, callback, step) {
 		if (!currentLat) {
@@ -136,7 +221,11 @@ L.Comment.include({
 		return this;
 	},
 	/**
+	 * Position the pop-up on the map
+	 * based on provided lat and lng values
 	 * @private
+	 * @param {L.LatLng} latLng - The latitude and longitude values to place the pop-up
+	 * @return {L.Comment} the current instance
 	 */
 	_placePopup : function(latLng) {
 		this._popup.setLatLng(latLng);
@@ -148,22 +237,12 @@ L.Comment.include({
 	_bindEventOnContainer : function(event, container) {
 		var self = this;
 		container.addEventListener(event, function(evt) {
-			self._saveInCookie(self._getPopupProperties());
+			self._saveInCookie(self.getPopupProperties());
 			if (self.options.onInput) {
 				self.options.onInput.call(self, container.id, evt.target.value);
 			}
 		}, false);
 		return container;
-	},
-	/**
-	 * @private
-	 */
-	_getPopupProperties : function() {
-		var props = {
-			value : this._popup.getContent().value
-		};
-		L.Util.setOptions(props, this.options);
-		return props;
 	},
 	/**
 	 * @private
@@ -193,7 +272,11 @@ L.Comment.include({
 		return container;
 	},
 	/**
+	 * Initialize an instance based on
+	 * information retrieved from cookies
+	 * /!\ Does not work when tested from a "file://" protocol
 	 * @private
+	 * @return {L.Comment} the current instance
 	 */
 	_initFromCookies : function() {
 		if (this.options.useCookies) {
@@ -202,7 +285,11 @@ L.Comment.include({
 		return this;
 	},
 	/**
+	 * Save the instance properties
+	 * in the cookie storage
+	 * /!\ Does not work when tested from a "file://" protocol
 	 * @private
+	 * @return {L.Comment} the current instance
 	 */
 	_saveInCookie : function(value) {
 		var expirationThreshold, date;
